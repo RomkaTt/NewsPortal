@@ -10,7 +10,7 @@ class PostFilter(FilterSet):
         queryset=User.objects.all(),
         label='Author',
     )
-    time_in = DateFilter(lookup_expr='lt', widget=DateInput(attrs={'type': 'date'}))
+    time_in = DateFilter(lookup_expr='gt', widget=DateInput(attrs={'type': 'date'}))
 
     class Meta:
         model = Post
