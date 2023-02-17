@@ -1,0 +1,85 @@
+1. Создаем двух пользователей:
+
+from news.models import *
+User.objects.create(username = "Иван Петров")
+User.objects.create(username = "Екатерина Рогова")
+
+2. Создаем две модели объекта Author, связанные с пользователями.
+
+Author.objects.create(user_id = 1)
+Author.objects.create(user_id = 2)
+
+3. Добавляем 4 категории в модель Category
+
+c1 = Category(name_category = 'C1')
+c1.save()
+c2 = Category(name_category = 'C2')
+c2.save()
+c3 = Category(name_category = 'C3')
+c3.save()
+c4 = Category(name_category = 'C4')
+c4.save()
+
+4 b 5. Добавляем 2 статьи и 1 новость, и присваиваем им категории
+
+Author1 = Author.objects.get(pk=1)
+p1 = Post.objects.create(author = Author1, type_post = article, title = 'first art', text  =  'Метод values()принимает необязательные позиционные аргументы, *fieldsкоторые определяют имена полей, которыми SELECTдолжно быть ограничено. Если вы укажете поля, каждый словарь будет содержать только ключи/значения полей для указанных вами полей. Если вы не укажете поля, каждый словарь будет содержать ключ и значение для каждого поля в таблице базы данных.')
+p1.post_category.add(c1, c2)
+p1.save()
+p2 = Post.objects.create(author = Author1, type_post = article, title = 'second art', text = 'Если у вас есть поле с именем foo, вызов ForeignKeyпо умолчанию values()вернет ключ словаря с именем foo_id, так как это имя скрытого атрибута модели, в котором хранится фактическое значение ( foo атрибут относится к связанной модели). Когда вы вызываете values()и передаете имена полей, вы можете передать либо foo или foo_id, и вы получите то же самое (ключ словаря будет соответствовать имени поля, которое вы передали)')
+p2.post_category.add(c3)
+p2.save()
+
+Author2 = Author.objects.get(pk=2)
+p3 = Post.objects.create(author = Author2, type_post = news, title = 'first text', text = 'values()и values_list()оба предназначены для оптимизации для конкретного варианта использования: получение подмножества данных без накладных расходов на создание экземпляра модели. Эта метафора разваливается при работе с отношениями «многие ко многим» и другими многозначными отношениями (такими как отношение «один ко многим» обратного внешнего ключа), потому что предположение «одна строка, один объект» не выполняется.')
+p3.post_category.add(c4)
+p3.save()
+
+6 Создаем комментарии
+
+Comment.objects.create(post=Post.objects.get(id=1), user=User.objects.get(pk=1), text_comment='Text1')
+Comment.objects.create(post=Post.objects.get(id=1), user=User.objects.get(pk=2), text_comment='Text2')
+Comment.objects.create(post=Post.objects.get(id=2), user=User.objects.get(pk=2), text_comment='Text3')
+Comment.objects.create(post=Post.objects.get(id=2), user=User.objects.get(pk=1), text_comment='Text4')
+Comment.objects.create(post=Post.objects.get(id=3), user=User.objects.get(pk=1), text_comment='Text5')
+
+7. Применяем функции like() и dislike() к новостям и комментариям
+
+Post.objects.get(pk=1).like()
+Post.objects.get(pk=1).like()
+Post.objects.get(pk=1).like()
+Post.objects.get(pk=2).dislike()
+Post.objects.get(pk=3).like()
+Post.objects.get(pk=2).like()
+Comment.objects.get(pk=1).like()
+Comment.objects.get(pk=1).like()
+Comment.objects.get(pk=1).like()
+Comment.objects.get(pk=2).like()
+Comment.objects.get(pk=3).like()
+Comment.objects.get(pk=4).dislike()
+Comment.objects.get(pk=5).like()
+Comment.objects.get(pk=5).dislike()
+
+
+
+8. Обновляем рейтинг пользователей
+
+Author.objects.get(pk=1).update_rating()
+Author.objects.get(pk=2).update_rating()
+
+9. Выводим имя и рейтинг лучшего пользователя сортировкой и возвращая поля первого объекта
+
+Author.objects.all().values('user__username', 'rating_author').order_by('-rating_author').first()
+
+10. Выводим дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+
+bestpost1=Post.objects.all().order_by('-rating_post').first()
+Post.objects.filter(id=bestpost).values('time_in','rating_post','title')
+Post.objects.order_by('-rating_post).first().author.user.username
+bestpost1.preview()
+
+11. Выводим все комментарии к лучшей статье(дата, пользователь, рейтинг, текст)
+
+comment_all_to_best_post=Comment.objects.filter(post= bestpost1).values('time_in', 'user__username', 'rating_comment', 'text_comment')
+comment_all_to_best_post
+
